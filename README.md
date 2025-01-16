@@ -183,7 +183,7 @@ The native bootchooser implementation in the RAUC tree is on its way.
 
 ## EXAMPLE
 
-The three files [system.conf-pi4], [autoboot.txt-a] and [hooks.bash] in the
+The three files [system.conf-pi4], [autoboot.txt-a] and [hook.bash] in the
 directory `support` provide an example of a RAUC Raspberry Pi 4 Model B.
 
 	install -D -m0644 support/system.conf-pi4 /etc/rauc/system.conf
@@ -241,9 +241,9 @@ Written by Gaël PORTAY *gael.portay@rtone.fr*
 
 ## COPYRIGHT
 
-Copyright 2024 Gaël PORTAY
+Copyright 2024-2025 Gaël PORTAY
 
-Copyright 2024 Rtone
+Copyright 2024-2025 Rtone
 
 This program is free software: you can redistribute it and/or modify it under
 the terms of the GNU Lesser General Public License as published by the Free
@@ -277,10 +277,12 @@ later version.
 [hook]: https://rauc.readthedocs.io/en/latest/using.html#bundle-based-customization-hooks
 [linux]: https://github.com/raspberrypi/linux/commit/777a6a08bcf8f5f0a0086358dc66d8918a0e1c57#diff-1c6051b88ea21684666367f31afc5452e51abc9fe5f340281cd9d38459ac3d35R224-R225
 [mailbox property interface]: https://github.com/raspberrypi/firmware/wiki/Mailbox-property-interface
+[meta-downstream]: https://www.portay.io/meta-downstream
 [meta-rauc-raspberrypi-firmware]: https://github.com/gportay/meta-downstream/blob/master/meta-rauc-raspberrypi-firmware
 [raspberrypi firmware driver]: https://github.com/raspberrypi/linux/blob/rpi-6.6.y/drivers/firmware/raspberrypi.c
 [reboot(2)]: https://linux.die.net/man/2/reboot
 [reboot]: https://www.freedesktop.org/software/systemd/man/latest/systemctl.html#reboot
+[rtone-br2-external]: https://rtone.github.io/rtone-br2-external
 [system.conf-pi4]: support/system.conf
 [system.conf]: https://rauc.readthedocs.io/en/latest/reference.html#sec-ref-slot-config
 [tryboot]: https://www.raspberrypi.com/documentation/computers/raspberry-pi.html#fail-safe-os-updates-tryboot
