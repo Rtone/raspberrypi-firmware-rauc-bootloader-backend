@@ -18,7 +18,7 @@ install:
 						       --variable=systemdsystemunitdir \
 						       systemd 2>/dev/null)}; \
 	if [ -n "$$unitdir" ]; then \
-		install -D -m 755 rauc-mark-good.service $(DESTDIR)$$unitdir/rauc-mark-good.service; \
+		install -D -m 644 rauc-mark-good.service $(DESTDIR)$$unitdir/rauc-mark-good.service; \
 	fi
 
 .PHONY: uninstall
