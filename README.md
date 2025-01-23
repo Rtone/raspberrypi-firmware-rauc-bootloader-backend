@@ -179,7 +179,7 @@ filesystem as well.
 
 ## NATIVE BOOTCHOOSER IMPLEMENTATION
 
-The native bootchooser implementation in the RAUC tree is on its way.
+The native bootchooser implementation in the RAUC tree is [ongoing][PR].
 
 ## EXAMPLE
 
@@ -259,6 +259,7 @@ later version.
 [Bourne Again shell]: https://www.gnu.org/software/bash/
 [Buildroot package]: https://github.com/Rtone/rtone-br2-external/tree/main/package/raspberrypi-firmware-systemd-generator
 [EFI]: https://rauc.readthedocs.io/en/latest/integration.html#efi
+[PR]: https://github.com/rauc/rauc/pull/1599
 [Raspberry Pi hardwares]: https://www.raspberrypi.com/products/
 [U-Boot]: https://rauc.readthedocs.io/en/latest/integration.html#id5
 [autoboot.txt-a]: support/autoboot.txt-a
