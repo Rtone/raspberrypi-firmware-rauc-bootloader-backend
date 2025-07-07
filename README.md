@@ -229,7 +229,7 @@ a [Bitbake recipe] is available in the layer [meta-downstream].
 
 ## PATCHES
 
-Sumbit patches at <https://github.com/Rtone/raspberrypi-firmware-rauc-bootloader-backend/pulls>
+Submit patches at <https://github.com/Rtone/raspberrypi-firmware-rauc-bootloader-backend/pulls>
 
 ## BUGS
 
