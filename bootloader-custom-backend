@@ -21,10 +21,6 @@
 
 set -e
 
-warning() {
-	echo "Warning: $*" >&2
-}
-
 error() {
 	echo "Error: $*" >&2
 }
@@ -102,26 +98,6 @@ source_file() {
 	done
 }
 
-# Output the device's partition number of the given device using the sysfs.
-#
-# Examples:
-#
-#	$ device_partition /dev/sda1
-#	1
-#
-#	$ device_partition /dev/mmcblk0p2
-#	2
-#
-device_partition() {
-	local dev
-
-	if ! dev="$(readlink -f "$1")"
-	then
-		return 1
-	fi
-	cat "/sys/class/block/${dev##*/}/partition"
-}
-
 # Output the bootname's slot of the given boot_partition number using the RAUC
 # system.conf file.
 #
@@ -131,120 +107,34 @@ device_partition() {
 #	(...)
 # 	[slot.firmware.0]
 # 	device=/dev/mmcblk0p2
-# 	parent=rootfs.0
+# 	bootname=2
 #	(...)
 #
 # 	[slot.firmware.1]
 # 	device=/dev/mmcblk0p3
-# 	parent=rootfs.1
+# 	bootname=3
 #	(...)
 #
 # 	[slot.rootfs.0]
 # 	device=/dev/mmcblk0p5
-# 	bootname=A
+# 	parent=firmware.0
 #	(...)
 #
 # 	[slot.rootfs.1]
 # 	device=/dev/mmcblk0p6
-# 	bootname=B
+# 	parent=firmware.1
 #	(...)
 #
-#	$ get_slot_by_bootloader_partition 1
-#	/etc/rauc/system.conf: 1: No such boot_partition
+#	$ get_slot 1
+#	/etc/rauc/system.conf: 1: No such bootname
 #
-#	$ get_slot_by_bootloader_partition 2
-#	A
+#	$ get_slot 2
+#	2
 #
-#	$ get_slot_by_bootloader_partition 3
-#	B
+#	$ get_slot 3
+#	3
 #
-get_slot_by_bootloader_partition() {
-	local i
-
-	source_file "${SYSTEM_CONF:-/etc/rauc/system.conf}"
-	for i in "${INI[@]}"
-	do
-		local partition
-		local bootname
-		local parent
-		local device
-		local v
-
-		if ! [[ "$i" =~ ^slot\. ]]
-		then
-			continue
-		fi
-
-		v="$i"
-		v="${v//./_}"
-		v="${v//-/_}"
-		eval "device=\$INI__${v^^}__DEVICE"
-		eval "parent=\$INI__${v^^}__PARENT"
-
-		if ! partition="$(device_partition "$device")" ||
-		   [[ "$partition" != "$1" ]] ||
-		   [[ ! "$parent" ]]
-		then
-			continue
-		fi
-
-		v="slot.$parent"
-		v="${v//./_}"
-		v="${v//-/_}"
-		eval "bootname=\$INI__${v^^}__BOOTNAME"
-		if [[ ! "$bootname" ]]
-		then
-			warning "$parent: bootname: No such property"
-			continue
-		fi
-
-		echo "$bootname"
-		unset INI "${!INI@}"
-		return
-	done
-
-	error "${SYSTEM_CONF:-/etc/rauc/system.conf}: $1: No such boot_partition"
-	unset INI "${!INI@}"
-	return 1
-}
-
-# Output the bootname if the slot of the given bootname is set in the RAUC
-# system.conf file.
-#
-# Examples:
-#
-#	$ cat /etc/rauc/system.conf
-#	(...)
-# 	[slot.firmware.0]
-# 	device=/dev/mmcblk0p2
-# 	parent=rootfs.0
-#	(...)
-#
-# 	[slot.firmware.1]
-# 	device=/dev/mmcblk0p3
-# 	parent=rootfs.1
-#	(...)
-#
-# 	[slot.rootfs.0]
-# 	device=/dev/mmcblk0p5
-# 	bootname=A
-#	(...)
-#
-# 	[slot.rootfs.1]
-# 	device=/dev/mmcblk0p6
-# 	bootname=B
-#	(...)
-#
-#	$ get_slot_by_bootloader_partition 1
-#	/etc/rauc/system.conf: 1: No such boot_partition
-#
-#	$ get_slot_by_bootname A
-#	A
-#
-#	$ get_slot_by_bootname B
-#	B
-#
-get_slot_by_bootname() {
+get_slot() {
 	local i
 
 	source_file "${SYSTEM_CONF:-/etc/rauc/system.conf}"
@@ -262,24 +152,7 @@ get_slot_by_bootname() {
 		v="$i"
 		v="${v//./_}"
 		v="${v//-/_}"
-		eval "device=\$INI__${v^^}__DEVICE"
-		eval "parent=\$INI__${v^^}__PARENT"
-
-		if [[ ! "$parent" ]]
-		then
-			continue
-		fi
-
-		v="slot.$parent"
-		v="${v//./_}"
-		v="${v//-/_}"
 		eval "bootname=\$INI__${v^^}__BOOTNAME"
-		if [[ ! "$bootname" ]]
-		then
-			warning "$parent: bootname: No such property"
-			continue
-		fi
-
 		if [[ "$bootname" != "$1" ]]
 		then
 			continue
@@ -398,7 +271,7 @@ get_state() {
 		return 1
 	fi
 
-	if ! slot="$(get_slot_by_bootloader_partition "$partition")"
+	if ! slot="$(get_slot "$partition")"
 	then
 		error "$partition: Cannot get slot"
 		return 1
@@ -441,7 +314,7 @@ set_state() {
 		return 1
 	fi
 
-	if ! slot="$(get_slot_by_bootname "$1")"
+	if ! slot="$(get_slot "$1")"
 	then
 		error "$1: Cannot get slot"
 		return 1
@@ -464,12 +337,12 @@ set_state() {
 	fi
 }
 
-# Output the parent bootname's slot of the boot_partition set in the section
-# [all] of the file autoboot.txt.
+# Output the bootname's slot of the boot_partition set in the section [all] of
+# the file autoboot.txt if a slot defines bootname in system.conf.
 #
-# Note: The boot_partition device **MUST** be defined in system.conf and it
-# **MUST** be part of the slot group; the slot for the boot partition is not
-# bootname'd but it is parent'ed to the slot for the root partition instead.
+# Note: The boot_partition device **MUST** be defined in system.conf; the slot
+# for the boot partition is bootname'd, and the slot for the root is parent'ed
+# to it.
 #
 # https://rauc.readthedocs.io/en/latest/integration.html#grouping-slots
 #
@@ -487,8 +360,6 @@ get_primary() {
 	do
 		local partition
 		local bootname
-		local parent
-		local device
 		local v
 
 		if ! [[ "$i" =~ ^slot\. ]]
@@ -499,23 +370,9 @@ get_primary() {
 		v="$i"
 		v="${v//./_}"
 		v="${v//-/_}"
-		eval "device=\$INI__${v^^}__DEVICE"
-		eval "parent=\$INI__${v^^}__PARENT"
-
-		if ! partition="$(device_partition "$device")" ||
-		   [[ "$partition" != "$boot_partition" ]] ||
-		   [[ ! "$parent" ]]
-		then
-			continue
-		fi
-
-		v="slot.$parent"
-		v="${v//./_}"
-		v="${v//-/_}"
 		eval "bootname=\$INI__${v^^}__BOOTNAME"
-		if [[ ! "$bootname" ]]
+		if [[ "$bootname" != "$boot_partition" ]]
 		then
-			warning "$parent: bootname: No such property"
 			continue
 		fi
 
@@ -523,7 +380,7 @@ get_primary() {
 		return
 	done
 
-	error "${SYSTEM_CONF:-/etc/rauc/system.conf}: $boot_partition: No such boot_partition"
+	error "${SYSTEM_CONF:-/etc/rauc/system.conf}: $boot_partition: No such bootname"
 	return 1
 }
 
@@ -572,7 +429,7 @@ get_current() {
 		return 1
 	fi
 
-	if ! slot="$(get_slot_by_bootloader_partition "$partition")"
+	if ! slot="$(get_slot "$partition")"
 	then
 		error "$partition: Cannot get slot"
 		return 1

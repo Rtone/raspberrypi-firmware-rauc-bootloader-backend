@@ -19,19 +19,19 @@ bootloader-custom-backend=/usr/lib/raspberrypi-firmware-rauc-bootloader-backend/
 [slot.firmware.0]
 device=/dev/mmcblk0p2
 type=vfat
-parent=rootfs.0
+bootname=2
 
 [slot.firmware.1]
 device=/dev/mmcblk0p3
 type=vfat
-parent=rootfs.1
+bootname=3
 
 [slot.rootfs.0]
 device=/dev/mmcblk0p5
 type=ext4
-bootname=ROOTFS-A
+parent=firmware.0
 
 [slot.rootfs.1]
 device=/dev/mmcblk0p6
 type=ext4
-bootname=ROOTFS-B
+parent=firmware.1

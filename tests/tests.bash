@@ -101,7 +101,7 @@ cp autoboot.txt-a "$AUTOBOOT_TXT"
 # must return with non-zero value.
 
 run "get-primary reports the boot_partition from section [all] in autoboot.txt if undefined slot is booted"
-if bootloader-custom-backend get-primary | tee /dev/stderr | grep -q '^ROOTFS-A$'
+if bootloader-custom-backend get-primary | tee /dev/stderr | grep -q '^2$'
 then
 	ok
 else
@@ -111,7 +111,7 @@ echo
 
 run "get-primary reports the boot_partition from section [all] in autoboot.txt if primary slot is booted"
 if FDTGET_CHOSEN_BOOTLOADER_PARTITION=2 \
-   bootloader-custom-backend get-primary | tee /dev/stderr | grep -q '^ROOTFS-A$'
+   bootloader-custom-backend get-primary | tee /dev/stderr | grep -q '^2$'
 then
 	ok
 else
@@ -122,7 +122,7 @@ echo
 run "get-primary reports the boot_partition from section [all] in autoboot.txt if primary slot is booted and the tryboot flag is set"
 if FDTGET_CHOSEN_BOOTLOADER_PARTITION=2 \
    FDTGET_CHOSEN_BOOTLOADER_TRYBOOT=1 \
-   bootloader-custom-backend get-primary | tee /dev/stderr | grep -q '^ROOTFS-A$'
+   bootloader-custom-backend get-primary | tee /dev/stderr | grep -q '^2$'
 then
 	ok
 else
@@ -132,7 +132,7 @@ echo
 
 run "get-primary reports the boot_partition from section [all] in autoboot.txt if other slot is booted"
 if FDTGET_CHOSEN_BOOTLOADER_PARTITION=3 \
-   bootloader-custom-backend get-primary | tee /dev/stderr | grep -q '^ROOTFS-A$'
+   bootloader-custom-backend get-primary | tee /dev/stderr | grep -q '^2$'
 then
 	ok
 else
@@ -143,7 +143,7 @@ echo
 run "get-primary reports the boot_partition from section [all] in autoboot.txt if other slot is booted and the tryboot flag is set"
 if FDTGET_CHOSEN_BOOTLOADER_PARTITION=3 \
    FDTGET_CHOSEN_BOOTLOADER_TRYBOOT=1 \
-   bootloader-custom-backend get-primary | tee /dev/stderr | grep -q '^ROOTFS-A$'
+   bootloader-custom-backend get-primary | tee /dev/stderr | grep -q '^2$'
 then
 	ok
 else
@@ -160,7 +160,7 @@ echo
 # 0, otherwise the return value must be non-zero.
 
 run "set-primary keeps the autoboot.txt unchanged if the primary slot is marked as primary even if an undefined slot is booted"
-if bootloader-custom-backend set-primary ROOTFS-A && \
+if bootloader-custom-backend set-primary 2 && \
    diff "$AUTOBOOT_TXT" autoboot.txt-a
 then
 	ok
@@ -171,7 +171,7 @@ echo
 
 run "set-primary keeps the autoboot.txt unchanged if the primary slot is marked as primary if the primary slot is booted"
 if FDTGET_CHOSEN_BOOTLOADER_PARTITION=2 \
-   bootloader-custom-backend set-primary ROOTFS-A && \
+   bootloader-custom-backend set-primary 2 && \
    diff "$AUTOBOOT_TXT" autoboot.txt-a
 then
 	ok
@@ -190,7 +190,7 @@ echo
 # handler must exit with non-zero return value.
 
 run "get-state fails if slot is not defined in /etc/rauc/system.conf"
-if ! bootloader-custom-backend get-state ROOTFS-UNDEFINED
+if ! bootloader-custom-backend get-state 0
 then
 	ok
 else
@@ -200,7 +200,8 @@ echo
 
 run "get-state reports the primary slot as good if the primary slot is booted"
 if FDTGET_CHOSEN_BOOTLOADER_PARTITION=2 \
-   bootloader-custom-backend get-state ROOTFS-A | tee /dev/stderr | grep -q '^good$'
+   FDTGET_CHOSEN_BOOTLOADER_TRYBOOT=0 \
+   bootloader-custom-backend get-state 2 | tee /dev/stderr | grep -q '^good$'
 then
 	ok
 else
@@ -211,7 +212,7 @@ echo
 run "get-state reports the primary slot as good if the primary slot is booted and the tryboot flag is set"
 if FDTGET_CHOSEN_BOOTLOADER_PARTITION=2 \
    FDTGET_CHOSEN_BOOTLOADER_TRYBOOT=1 \
-   bootloader-custom-backend get-state ROOTFS-A | tee /dev/stderr | grep -q '^good$'
+   bootloader-custom-backend get-state 2 | tee /dev/stderr | grep -q '^good$'
 then
 	ok
 else
@@ -221,7 +222,7 @@ echo
 
 run "get-state reports the primary slot as bad if the other slot is booted"
 if FDTGET_CHOSEN_BOOTLOADER_PARTITION=3 \
-   bootloader-custom-backend get-state ROOTFS-A | tee /dev/stderr | grep -q '^bad$'
+   bootloader-custom-backend get-state 2 | tee /dev/stderr | grep -q '^bad$'
 then
 	ok
 else
@@ -232,7 +233,7 @@ echo
 run "get-state reports the primary slot as good if the other slot is booted and if the tryboot flag is set"
 if FDTGET_CHOSEN_BOOTLOADER_PARTITION=3 \
    FDTGET_CHOSEN_BOOTLOADER_TRYBOOT=1 \
-   bootloader-custom-backend get-state ROOTFS-A | tee /dev/stderr | grep -q '^good$'
+   bootloader-custom-backend get-state 2 | tee /dev/stderr | grep -q '^good$'
 then
 	ok
 else
@@ -253,8 +254,8 @@ echo
 # non-zero if an error occurred.
 
 run "set-state fails if slot is not defined in /etc/rauc/system.conf"
-if ! bootloader-custom-backend set-state ROOTFS-UNDEFINED good && \
-   ! bootloader-custom-backend set-state ROOTFS-UNDEFINED bad
+if ! bootloader-custom-backend set-state 0 good && \
+   ! bootloader-custom-backend set-state 0 bad 
 then
 	ok
 else
@@ -263,7 +264,7 @@ fi
 echo
 
 run "set-state keeps the autoboot.txt unchanged if the primary slot is marked as good even if an undefined slot is booted"
-if bootloader-custom-backend set-state ROOTFS-A good && \
+if bootloader-custom-backend set-state 2 good && \
    diff "$AUTOBOOT_TXT" autoboot.txt-a
 then
 	ok
@@ -274,7 +275,7 @@ echo
 
 run "set-state keeps the autoboot.txt unchanged if the primary slot is marked as good and if the primary slot is booted"
 if FDTGET_CHOSEN_BOOTLOADER_PARTITION=2 \
-   bootloader-custom-backend set-state ROOTFS-A good && \
+   bootloader-custom-backend set-state 2 good && \
    diff "$AUTOBOOT_TXT" autoboot.txt-a
 then
 	ok
@@ -286,7 +287,7 @@ echo
 run "set-state keeps the autoboot.txt unchanged if the primary slot is marked as good and if the primary slot is booted and the tryboot flag is set"
 if FDTGET_CHOSEN_BOOTLOADER_PARTITION=2 \
    FDTGET_CHOSEN_BOOTLOADER_TRYBOOT=1 \
-   bootloader-custom-backend set-state ROOTFS-A good && \
+   bootloader-custom-backend set-state 2 good && \
    diff "$AUTOBOOT_TXT" autoboot.txt-a
 then
 	ok
@@ -298,7 +299,7 @@ echo
 run "set-state keeps the autoboot.txt unchanged if the primary slot is marked as good even if the other slot is booted and the tryboot flag is set"
 if FDTGET_CHOSEN_BOOTLOADER_PARTITION=3 \
    FDTGET_CHOSEN_BOOTLOADER_TRYBOOT=1 \
-   bootloader-custom-backend set-state ROOTFS-A good && \
+   bootloader-custom-backend set-state 2 good && \
    diff "$AUTOBOOT_TXT" autoboot.txt-a
 then
 	ok
@@ -310,7 +311,7 @@ echo
 run "set-state keeps the boot_partition in autoboot.txt if the primary slot is marked as good"
 if FDTGET_CHOSEN_BOOTLOADER_PARTITION=3 \
    FDTGET_CHOSEN_BOOTLOADER_TRYBOOT=1 \
-   bootloader-custom-backend set-state ROOTFS-A good && \
+   bootloader-custom-backend set-state 2 good && \
    diff "$AUTOBOOT_TXT" autoboot.txt-a
 then
 	ok
@@ -320,7 +321,7 @@ fi
 echo
 
 run "set-state swaps the boot_partition in autoboot.txt if the other slot is marked as good"
-if bootloader-custom-backend set-state ROOTFS-B good && \
+if bootloader-custom-backend set-state 3 good && \
    diff "$AUTOBOOT_TXT" autoboot.txt-b
 then
 	ok
@@ -350,7 +351,7 @@ echo
 
 run "get-current reports the primary slot if primary slot is booted"
 if FDTGET_CHOSEN_BOOTLOADER_PARTITION=2 \
-   bootloader-custom-backend get-current | tee /dev/stderr | grep -q '^ROOTFS-A$'
+   bootloader-custom-backend get-current | tee /dev/stderr | grep -q '^2$'
 then
 	ok
 else
@@ -360,7 +361,7 @@ echo
 
 run "get-current reports the other slot if other slot is booted"
 if FDTGET_CHOSEN_BOOTLOADER_PARTITION=3 \
-   bootloader-custom-backend get-current | tee /dev/stderr | grep -q '^ROOTFS-B$'
+   bootloader-custom-backend get-current | tee /dev/stderr | grep -q '^3$'
 then
 	ok
 else
@@ -371,7 +372,7 @@ echo
 run "get-current reports the other slot if other slot is booted and the tryboot flag is set"
 if FDTGET_CHOSEN_BOOTLOADER_PARTITION=3 \
    FDTGET_CHOSEN_BOOTLOADER_TRYBOOT=1 \
-   bootloader-custom-backend get-current | tee /dev/stderr | grep -q '^ROOTFS-B$'
+   bootloader-custom-backend get-current | tee /dev/stderr | grep -q '^3$'
 then
 	ok
 else
