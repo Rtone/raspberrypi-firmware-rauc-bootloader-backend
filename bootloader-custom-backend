@@ -74,8 +74,6 @@ error() {
 #
 source_file() {
 	local __s
-	local __p
-	local __v
 
 	unset INI "${!INI@}"
 	mapfile -t lines <"$1"
@@ -89,6 +87,9 @@ source_file() {
 			eval "INI+=('${BASH_REMATCH[1]}')"
 		elif [[ "$line" =~ ^([A-Za-z0-9_-]+)=(.*)$ ]]
 		then
+			local __p
+			local __v
+
 			__p="${BASH_REMATCH[1]}"
 			__p="${__p//./_}"
 			__p="${__p//-/_}"
@@ -472,11 +473,7 @@ set_state() {
 # it says no word about the boot'ed device (i.e. it says ~~/dev/mmcblk0p~~1).
 get_primary() {
 	local boot_partition
-	local partition
-	local bootname
-	local device
 	local i
-	local v
 
 	source_file /boot/autoboot.txt
 	boot_partition="$INI__ALL__BOOT_PARTITION"
@@ -484,6 +481,11 @@ get_primary() {
 	source_file /etc/rauc/system.conf
 	for i in "${INI[@]}"
 	do
+		local partition
+		local bootname
+		local device
+		local v
+
 		if ! [[ "$i" =~ ^slot\. ]]
 		then
 			continue
