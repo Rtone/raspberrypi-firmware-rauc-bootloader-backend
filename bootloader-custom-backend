@@ -123,12 +123,12 @@ device_partition() {
 #
 #	$ cat /etc/rauc/system.conf
 #	(...)
-# 	[slot.boot.0]
+# 	[slot.firmware.0]
 # 	device=/dev/mmcblk0p2
 # 	parent=rootfs.0
 #	(...)
 #
-# 	[slot.boot.1]
+# 	[slot.firmware.1]
 # 	device=/dev/mmcblk0p3
 # 	parent=rootfs.1
 #	(...)
