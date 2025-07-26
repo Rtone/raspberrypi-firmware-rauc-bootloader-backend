@@ -1,7 +1,7 @@
 #!/bin/bash
 #
-# Copyright 2023-2024 Gaël PORTAY
-#           2023-2024 Rtone
+# Copyright 2023-2025 Gaël PORTAY
+#           2023-2025 Rtone
 #
 # SPDX-License-Identifier: LGPL-2.1-only
 #
@@ -58,7 +58,7 @@ error() {
 #	all tryboot
 #
 #	$ echo "${INI__ALL[@]}"
-#	btryboot_a_b boot_partition
+#	tryboot_a_b boot_partition
 #
 #	$ echo "${INI__TRYBOOT[@]}"
 #	boot_partition
@@ -125,12 +125,12 @@ device_partition() {
 #	(...)
 # 	[slot.boot.0]
 # 	device=/dev/mmcblk0p2
-# 	parent=A
+# 	parent=rootfs.0
 #	(...)
 #
 # 	[slot.boot.1]
 # 	device=/dev/mmcblk0p3
-# 	parent=B
+# 	parent=rootfs.1
 #	(...)
 #
 # 	[slot.rootfs.0]
