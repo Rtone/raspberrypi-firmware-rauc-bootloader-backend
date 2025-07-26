@@ -73,6 +73,8 @@ error() {
 #	3
 #
 source_file() {
+	local lines
+	local line
 	local __s
 
 	unset INI "${!INI@}"
@@ -164,6 +166,8 @@ get_slot_by_bootloader_partition() {
 	do
 		local partition
 		local bootname
+		local parent
+		local device
 		local v
 
 		if ! [[ "$i" =~ ^slot\. ]]
@@ -483,6 +487,7 @@ get_primary() {
 	do
 		local partition
 		local bootname
+		local parent
 		local device
 		local v
 
@@ -526,6 +531,7 @@ get_primary() {
 # it is the boot'ed slot or temporarily via the tryboot reboot flag otherwise.
 set_primary() {
 	local tryboot
+	local primary
 
 	if ! primary="$(get_primary)"
 	then
