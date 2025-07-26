@@ -299,13 +299,13 @@ get_state() {
 
 	if ! partition="$(fdtget /sys/firmware/fdt /chosen/bootloader partition)"
 	then
-		error "partition: Cannot get boot partition"
+		error "partition: Cannot get bootloader partition"
 		return 1
 	fi
 
 	if ! slot="$(get_slot "$partition")"
 	then
-		error "Cannot get booted slot"
+		error "$partition: Cannot get slot"
 		return 1
 	fi
 
@@ -317,7 +317,7 @@ get_state() {
 
 	if ! tryboot="$(fdtget /sys/firmware/fdt /chosen/bootloader tryboot)"
 	then
-		error "tryboot: Cannot get reboot flag"
+		error "tryboot: Cannot get bootloader tryboot"
 		return 1
 	fi
 
@@ -342,7 +342,7 @@ set_state() {
 
 	if ! primary="$(get_primary)"
 	then
-		error "Cannot get primary slot"
+		error "primary: Cannot get slot"
 		return 1
 	fi
 
@@ -431,7 +431,7 @@ set_primary() {
 
 	if ! primary="$(get_primary)"
 	then
-		error "Cannot get primary slot"
+		error "primary: Cannot get slot"
 		return 1
 	fi
 
@@ -444,7 +444,7 @@ set_primary() {
 	# Set the other slot as primary slot.
 	if ! tryboot="$(fdtget /sys/firmware/fdt /chosen/bootloader tryboot)"
 	then
-		error "tryboot: Cannot get reboot flag"
+		error "tryboot: Cannot get bootloader tryboot"
 		return 1
 	fi
 
@@ -464,13 +464,13 @@ get_current() {
 
 	if ! partition="$(fdtget /sys/firmware/fdt /chosen/bootloader partition)"
 	then
-		error "partition: Cannot get boot partition"
+		error "partition: Cannot get bootloader partition"
 		return 1
 	fi
 
 	if ! slot="$(get_slot "$partition")"
 	then
-		error "Cannot get booted slot"
+		error "$partition: Cannot get slot"
 		return 1
 	fi
 
