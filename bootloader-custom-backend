@@ -112,7 +112,10 @@ source_file() {
 device_partition() {
 	local dev
 
-	dev="$(readlink -f "$1")"
+	if ! dev="$(readlink -f "$1")"
+	then
+		return 1
+	fi
 	cat "/sys/class/block/${dev##*/}/partition"
 }
 
