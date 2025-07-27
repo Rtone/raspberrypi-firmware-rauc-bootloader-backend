@@ -1,6 +1,6 @@
 #
-# Copyright 2024 Gaël PORTAY
-#           2024 Rtone
+# Copyright 2024-2025 Gaël PORTAY
+#           2024-2025 Rtone
 #
 # SPDX-License-Identifier: LGPL-2.1-or-later
 #
@@ -35,3 +35,8 @@ uninstall:
 .PHONY: check
 check: bootloader-custom-backend
 	shellcheck $^
+
+.PHONY: test
+test: PATH := $(CURDIR):$(PATH)
+test:
+	$(MAKE) -C tests $@

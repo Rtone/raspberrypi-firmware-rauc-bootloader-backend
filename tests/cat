@@ -1,0 +1,29 @@
+#!/bin/bash
+#
+# Copyright 2025 Gaël PORTAY
+#           2025 Rtone
+#
+# SPDX-License-Identifier: LGPL-2.1-or-later
+#
+
+set -e
+
+if [ $# -eq 1 ]
+then
+	# cat /sys/class/block/mmcblk0p1/partition
+	# 1
+	if [[ "$1" =~ ^/sys/class/block/(.+)p([0-9]+)/partition$ ]]
+	then
+		echo "${BASH_REMATCH[2]}"
+		exit 0
+	# cat /sys/class/block/sda1/partition
+	# 1
+	elif [[ "$1" =~ ^/sys/class/block/(.+)([0-9]+)/partition$ ]]
+	then
+		echo "${BASH_REMATCH[2]}"
+		exit 0
+	fi
+fi
+
+exec /usr/bin/cat "$@"
+

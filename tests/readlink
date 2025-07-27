@@ -1,0 +1,21 @@
+#!/bin/bash
+#
+# Copyright 2025 Gaël PORTAY
+#           2025 Rtone
+#
+# SPDX-License-Identifier: LGPL-2.1-or-later
+#
+
+set -e
+
+if [ $# -lt 2 ]; then
+	cat <<EOF >&2
+readlink: missing operand
+Try 'readlink --help' for more information.
+EOF
+	exit 1
+fi
+
+# readlink -f /dev/mmcblk0p1
+# /dev/mmcblk0p1
+echo "$2"

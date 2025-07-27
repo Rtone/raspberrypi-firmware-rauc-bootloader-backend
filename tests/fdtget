@@ -1,0 +1,25 @@
+#!/bin/bash
+#
+# Copyright 2025 Gaël PORTAY
+#           2025 Rtone
+#
+# SPDX-License-Identifier: LGPL-2.1-or-later
+#
+
+set -e
+
+if [ $# -eq 0 ]; then
+	cat <<EOF >&2
+Usage: read values from device tree
+Error: missing filename
+EOF
+	exit 1
+fi
+
+if [ $# -ne 3 ]; then
+	exit 1
+fi
+
+# fdtget /sys/firmware/fdt /chosen/bootloader partition
+# 0
+eval "echo \${FDTGET_CHOSEN_BOOTLOADER_${3^^}:-0}"

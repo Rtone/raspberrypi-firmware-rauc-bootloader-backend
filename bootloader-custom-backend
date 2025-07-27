@@ -161,7 +161,7 @@ device_partition() {
 get_slot_by_bootloader_partition() {
 	local i
 
-	source_file /etc/rauc/system.conf
+	source_file "${SYSTEM_CONF:-/etc/rauc/system.conf}"
 	for i in "${INI[@]}"
 	do
 		local partition
@@ -203,7 +203,7 @@ get_slot_by_bootloader_partition() {
 		return
 	done
 
-	error "/etc/rauc/system.conf: $1: No such boot_partition"
+	error "${SYSTEM_CONF:-/etc/rauc/system.conf}: $1: No such boot_partition"
 	unset INI "${!INI@}"
 	return 1
 }
@@ -349,16 +349,16 @@ set_primary_persistent() {
 	local tryboot_boot_partition
 	local all_boot_partition
 
-	source_file /boot/autoboot.txt
+	source_file "${AUTOBOOT_TXT:-/boot/autoboot.txt}"
 	all_boot_partition="$INI__ALL__BOOT_PARTITION"
 	tryboot_boot_partition="$INI__TRYBOOT__BOOT_PARTITION"
 
 	sed -e "/^boot_partition=$all_boot_partition/s,=.*,_tmp=$tryboot_boot_partition," \
 	    -e "/^boot_partition=$tryboot_boot_partition/s,=.*,_tmp=$all_boot_partition," \
 	    -e "s,boot_partition_tmp=,boot_partition=," \
-	    /boot/autoboot.txt >/boot/autoboot.txt.tmp
+	    "${AUTOBOOT_TXT:-/boot/autoboot.txt}" >"${AUTOBOOT_TXT:-/boot/autoboot.txt}".tmp
 
-	mv /boot/autoboot.txt{.tmp,}
+	mv "${AUTOBOOT_TXT:-/boot/autoboot.txt}"{.tmp,}
 }
 
 # RAUC custom bootloader backend interface
@@ -479,10 +479,10 @@ get_primary() {
 	local boot_partition
 	local i
 
-	source_file /boot/autoboot.txt
+	source_file "${AUTOBOOT_TXT:-/boot/autoboot.txt}"
 	boot_partition="$INI__ALL__BOOT_PARTITION"
 
-	source_file /etc/rauc/system.conf
+	source_file "${SYSTEM_CONF:-/etc/rauc/system.conf}"
 	for i in "${INI[@]}"
 	do
 		local partition
@@ -523,7 +523,7 @@ get_primary() {
 		return
 	done
 
-	error "/etc/rauc/system.conf: $boot_partition: No such boot_partition"
+	error "${SYSTEM_CONF:-/etc/rauc/system.conf}: $boot_partition: No such boot_partition"
 	return 1
 }
 
