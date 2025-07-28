@@ -146,16 +146,16 @@ device_partition() {
 # 	bootname=B
 #	(...)
 #
-#	$ get_slot 1
+#	$ get_slot_by_bootloader_partition 1
 #	/etc/rauc/system.conf: 1: No such boot_partition
 #
-#	$ get_slot 2
+#	$ get_slot_by_bootloader_partition 2
 #	A
 #
-#	$ get_slot 3
+#	$ get_slot_by_bootloader_partition 3
 #	B
 #
-get_slot() {
+get_slot_by_bootloader_partition() {
 	local i
 
 	source_file /etc/rauc/system.conf
@@ -199,6 +199,93 @@ get_slot() {
 	done
 
 	error "/etc/rauc/system.conf: $1: No such boot_partition"
+	unset INI "${!INI@}"
+	return 1
+}
+
+# Output the bootname if the slot of the given bootname is set in the RAUC
+# system.conf file.
+#
+# Examples:
+#
+#	$ cat /etc/rauc/system.conf
+#	(...)
+# 	[slot.firmware.0]
+# 	device=/dev/mmcblk0p2
+# 	parent=rootfs.0
+#	(...)
+#
+# 	[slot.firmware.1]
+# 	device=/dev/mmcblk0p3
+# 	parent=rootfs.1
+#	(...)
+#
+# 	[slot.rootfs.0]
+# 	device=/dev/mmcblk0p5
+# 	bootname=A
+#	(...)
+#
+# 	[slot.rootfs.1]
+# 	device=/dev/mmcblk0p6
+# 	bootname=B
+#	(...)
+#
+#	$ get_slot_by_bootloader_partition 1
+#	/etc/rauc/system.conf: 1: No such boot_partition
+#
+#	$ get_slot_by_bootname A
+#	A
+#
+#	$ get_slot_by_bootname B
+#	B
+#
+get_slot_by_bootname() {
+	local i
+
+	source_file "${SYSTEM_CONF:-/etc/rauc/system.conf}"
+	for i in "${INI[@]}"
+	do
+		local partition
+		local bootname
+		local v
+
+		if ! [[ "$i" =~ ^slot\. ]]
+		then
+			continue
+		fi
+
+		v="$i"
+		v="${v//./_}"
+		v="${v//-/_}"
+		eval "device=\$INI__${v^^}__DEVICE"
+		eval "parent=\$INI__${v^^}__PARENT"
+
+		if [[ ! "$parent" ]]
+		then
+			continue
+		fi
+
+		v="slot.$parent"
+		v="${v//./_}"
+		v="${v//-/_}"
+		eval "bootname=\$INI__${v^^}__BOOTNAME"
+		if [[ ! "$bootname" ]]
+		then
+			warning "$parent: bootname: No such property"
+			continue
+		fi
+
+		if [[ "$bootname" != "$1" ]]
+		then
+			continue
+		fi
+
+		echo "$bootname"
+		unset INI "${!INI@}"
+		return
+	done
+
+	error "${SYSTEM_CONF:-/etc/rauc/system.conf}: $1: No such bootname"
 	unset INI "${!INI@}"
 	return 1
 }
@@ -306,7 +393,7 @@ get_state() {
 		return 1
 	fi
 
-	if ! slot="$(get_slot "$partition")"
+	if ! slot="$(get_slot_by_bootloader_partition "$partition")"
 	then
 		error "$partition: Cannot get slot"
 		return 1
@@ -346,6 +433,12 @@ set_state() {
 	if ! primary="$(get_primary)"
 	then
 		error "primary: Cannot get slot"
+		return 1
+	fi
+
+	if ! slot="$(get_slot_by_bootname "$1")"
+	then
+		error "$1: Cannot get slot"
 		return 1
 	fi
 
@@ -471,7 +564,7 @@ get_current() {
 		return 1
 	fi
 
-	if ! slot="$(get_slot "$partition")"
+	if ! slot="$(get_slot_by_bootloader_partition "$partition")"
 	then
 		error "$partition: Cannot get slot"
 		return 1
