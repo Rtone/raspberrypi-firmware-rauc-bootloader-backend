@@ -82,16 +82,13 @@ result() {
 	exit "$exitcode"
 }
 
-AUTOBOOT_TXT="/tmp/autoboot.txt"
-export AUTOBOOT_TXT
-
 RAUC_SYSTEM_CONF="system.conf"
 export RAUC_SYSTEM_CONF
 
 PATH="$PWD:$PATH"
 trap result 0 SIGINT
 
-cp autoboot.txt-a "$AUTOBOOT_TXT"
+cp autoboot.txt-a /tmp/autoboot.txt
 
 # get-primary
 #
@@ -161,7 +158,7 @@ echo
 
 run "set-primary keeps the autoboot.txt unchanged if the primary slot is marked as primary even if an undefined slot is booted"
 if bootloader-custom-backend set-primary 2 && \
-   diff "$AUTOBOOT_TXT" autoboot.txt-a
+   diff /tmp/autoboot.txt autoboot.txt-a
 then
 	ok
 else
@@ -172,7 +169,7 @@ echo
 run "set-primary keeps the autoboot.txt unchanged if the primary slot is marked as primary if the primary slot is booted"
 if FDTGET_CHOSEN_BOOTLOADER_PARTITION=2 \
    bootloader-custom-backend set-primary 2 && \
-   diff "$AUTOBOOT_TXT" autoboot.txt-a
+   diff /tmp/autoboot.txt autoboot.txt-a
 then
 	ok
 else
@@ -265,7 +262,7 @@ echo
 
 run "set-state keeps the autoboot.txt unchanged if the primary slot is marked as good even if an undefined slot is booted"
 if bootloader-custom-backend set-state 2 good && \
-   diff "$AUTOBOOT_TXT" autoboot.txt-a
+   diff /tmp/autoboot.txt autoboot.txt-a
 then
 	ok
 else
@@ -276,7 +273,7 @@ echo
 run "set-state keeps the autoboot.txt unchanged if the primary slot is marked as good and if the primary slot is booted"
 if FDTGET_CHOSEN_BOOTLOADER_PARTITION=2 \
    bootloader-custom-backend set-state 2 good && \
-   diff "$AUTOBOOT_TXT" autoboot.txt-a
+   diff /tmp/autoboot.txt autoboot.txt-a
 then
 	ok
 else
@@ -288,7 +285,7 @@ run "set-state keeps the autoboot.txt unchanged if the primary slot is marked as
 if FDTGET_CHOSEN_BOOTLOADER_PARTITION=2 \
    FDTGET_CHOSEN_BOOTLOADER_TRYBOOT=1 \
    bootloader-custom-backend set-state 2 good && \
-   diff "$AUTOBOOT_TXT" autoboot.txt-a
+   diff /tmp/autoboot.txt autoboot.txt-a
 then
 	ok
 else
@@ -300,7 +297,7 @@ run "set-state keeps the autoboot.txt unchanged if the primary slot is marked as
 if FDTGET_CHOSEN_BOOTLOADER_PARTITION=3 \
    FDTGET_CHOSEN_BOOTLOADER_TRYBOOT=1 \
    bootloader-custom-backend set-state 2 good && \
-   diff "$AUTOBOOT_TXT" autoboot.txt-a
+   diff /tmp/autoboot.txt autoboot.txt-a
 then
 	ok
 else
@@ -312,7 +309,7 @@ run "set-state keeps the boot_partition in autoboot.txt if the primary slot is m
 if FDTGET_CHOSEN_BOOTLOADER_PARTITION=3 \
    FDTGET_CHOSEN_BOOTLOADER_TRYBOOT=1 \
    bootloader-custom-backend set-state 2 good && \
-   diff "$AUTOBOOT_TXT" autoboot.txt-a
+   diff /tmp/autoboot.txt autoboot.txt-a
 then
 	ok
 else
@@ -322,14 +319,14 @@ echo
 
 run "set-state swaps the boot_partition in autoboot.txt if the other slot is marked as good"
 if bootloader-custom-backend set-state 3 good && \
-   diff "$AUTOBOOT_TXT" autoboot.txt-b
+   diff /tmp/autoboot.txt autoboot.txt-b
 then
 	ok
 else
 	ko
 fi
 # restore setup
-cp autoboot.txt-a "$AUTOBOOT_TXT"
+cp autoboot.txt-a /tmp/autoboot.txt
 echo
 
 # get-current
