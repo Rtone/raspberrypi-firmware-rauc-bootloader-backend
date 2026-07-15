@@ -166,6 +166,34 @@ get_slot() {
 	return 1
 }
 
+# Get the oneshot reboot flag if the firmware is set to run tryboot at next
+# reboot.
+#
+# Examples:
+#
+# If the oneshot reboot flag is unset:
+#
+#	$ vcmailbox 0x00030064 4 0 0
+#	0x0000001c 0x80000000 0x00030064 0x00000004 0x80000004 0x00000000 0x00000000
+#	                                                                ^ unset
+#
+# If the oneshot reboot flag is set:
+#
+#	$ vcmailbox 0x00030064 4 0 0
+#	0x0000001c 0x80000000 0x00030064 0x00000004 0x80000004 0x00000001 0x00000000
+#	                                                                ^ set
+get_reboot_flag() {
+	local values
+
+	if ! read -r -a values < <(vcmailbox 0x00030064 4 0 0)
+	then
+		error "reboot: Cannot get oneshot reboot flag"
+		return 1
+	fi
+
+	echo "$((values[5]))"
+}
+
 # Set the oneshot reboot flag to cause the firmware to run tryboot at next
 # reboot.
 #
@@ -271,14 +299,15 @@ get_state() {
 	echo bad
 }
 
-# Set the other slot as primary:
-#  - if the given slot is the primary slot and the given state is "bad", or
-#  - if the given slot is **NOT** the primary slot **AND** the state is "good".
+# Set the other slot as primary persistently in autoboot.txt if the given slot
+# is not the primary slot, if the given state is "good", if the oneshot reboot
+# flag is unset **AND** if booted using tryboot.
 #
 # Do nothing otherwise.
 set_state() {
 	local primary
 	local tryboot
+	local reboot
 
 	if ! primary="$(get_primary)"
 	then
@@ -292,21 +321,44 @@ set_state() {
 		return 1
 	fi
 
-	# Mark the primary slot as bad: set the other slot as primary.
-	if [[ "$1" == "$primary" ]] && [[ "$2" == bad ]]
+	# the slot is bad, do nothing
+	if [[ "$2" == bad ]]
 	then
-		# Commit [tryboot] boot_partition to [all]
-		set_primary_persistent
 		return
 	fi
 
-	# Mark the other slot as good: set the other slot as primary.
-	if [[ "$1" != "$primary" ]] && [[ "$2" == good ]]
+	if ! tryboot="$(fdtget /sys/firmware/fdt /chosen/bootloader tryboot)"
 	then
-		# Commit [tryboot] boot_partition to [all]
-		set_primary_persistent
+		error "tryboot: Cannot get bootloader tryboot"
+		return 1
+	fi
+
+	# the tryboot is unset, do nothing
+	if [[ "$tryboot" -eq 0 ]]
+	then
 		return
 	fi
+
+	if ! reboot="$(get_reboot_flag)"
+	then
+		error "reboot: Cannot get oneshot reboot flag"
+		return 1
+	fi
+
+	# the oneshot reboot flag is already set, do nothing
+	if [[ "$reboot" -eq 1 ]]
+	then
+		return
+	fi
+
+	# the slot is the primary slot, do nothing
+	if [[ "$slot" == "$primary" ]]
+	then
+		return
+	fi
+
+	# the slot is not yet the primary slot, update autoboot.txt
+	set_primary_persistent
 }
 
 # Output the bootname's slot of the boot_partition set in the section [all] of

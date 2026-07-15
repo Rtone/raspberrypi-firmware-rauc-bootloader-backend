@@ -88,6 +88,7 @@ export RAUC_SYSTEM_CONF
 PATH="$PWD:$PATH"
 trap result 0 SIGINT
 
+rm -f /tmp/00038064
 cp autoboot.txt-a /tmp/autoboot.txt
 
 # get-primary
@@ -260,8 +261,8 @@ else
 fi
 echo
 
-run "set-state keeps the autoboot.txt unchanged if the primary slot is marked as good even if an undefined slot is booted"
-if bootloader-custom-backend set-state 2 good && \
+run "set-state ignores if the slot is marked as bad"
+if bootloader-custom-backend set-state 2 bad && \
    diff /tmp/autoboot.txt autoboot.txt-a
 then
 	ok
@@ -270,8 +271,18 @@ else
 fi
 echo
 
-run "set-state keeps the autoboot.txt unchanged if the primary slot is marked as good and if the primary slot is booted"
-if FDTGET_CHOSEN_BOOTLOADER_PARTITION=2 \
+run "set-state ignores if the slot is marked as bad, even if the slot is the other slot"
+if bootloader-custom-backend set-state 3 bad && \
+   diff /tmp/autoboot.txt autoboot.txt-a
+then
+	ok
+else
+	ko
+fi
+echo
+
+run "set-state keeps the autoboot.txt unchanged if the slot is marked as good and if the tryboot flag is unset"
+if FDTGET_CHOSEN_BOOTLOADER_TRYBOOT=0 \
    bootloader-custom-backend set-state 2 good && \
    diff /tmp/autoboot.txt autoboot.txt-a
 then
@@ -281,10 +292,9 @@ else
 fi
 echo
 
-run "set-state keeps the autoboot.txt unchanged if the primary slot is marked as good and if the primary slot is booted and the tryboot flag is set"
-if FDTGET_CHOSEN_BOOTLOADER_PARTITION=2 \
-   FDTGET_CHOSEN_BOOTLOADER_TRYBOOT=1 \
-   bootloader-custom-backend set-state 2 good && \
+run "set-state keeps the autoboot.txt unchanged if the slot is marked as good and if the tryboot flag is unset, even if the slot is the other slot"
+if FDTGET_CHOSEN_BOOTLOADER_TRYBOOT=0 \
+   bootloader-custom-backend set-state 3 good && \
    diff /tmp/autoboot.txt autoboot.txt-a
 then
 	ok
@@ -293,10 +303,10 @@ else
 fi
 echo
 
-run "set-state keeps the autoboot.txt unchanged if the primary slot is marked as good even if the other slot is booted and the tryboot flag is set"
-if FDTGET_CHOSEN_BOOTLOADER_PARTITION=3 \
-   FDTGET_CHOSEN_BOOTLOADER_TRYBOOT=1 \
-   bootloader-custom-backend set-state 2 good && \
+run "set-state keeps the autoboot.txt unchanged if the slot is marked as good and if the tryboot flag and the reboot flag are set"
+if FDTGET_CHOSEN_BOOTLOADER_TRYBOOT=1 \
+   VCMAILBOX_00030064=1 \
+   bootloader-custom-backend set-state 3 good && \
    diff /tmp/autoboot.txt autoboot.txt-a
 then
 	ok
@@ -305,20 +315,10 @@ else
 fi
 echo
 
-run "set-state keeps the boot_partition in autoboot.txt if the primary slot is marked as good"
-if FDTGET_CHOSEN_BOOTLOADER_PARTITION=3 \
-   FDTGET_CHOSEN_BOOTLOADER_TRYBOOT=1 \
-   bootloader-custom-backend set-state 2 good && \
-   diff /tmp/autoboot.txt autoboot.txt-a
-then
-	ok
-else
-	ko
-fi
-echo
-
-run "set-state swaps the boot_partition in autoboot.txt if the other slot is marked as good"
-if bootloader-custom-backend set-state 3 good && \
+run "set-state swaps the boot_partition in autoboot.txt if the other slot is marked as good and if the tryboot flag is set"
+if FDTGET_CHOSEN_BOOTLOADER_TRYBOOT=1 \
+   VCMAILBOX_00030064=0 \
+   bootloader-custom-backend set-state 3 good && \
    diff /tmp/autoboot.txt autoboot.txt-b
 then
 	ok
