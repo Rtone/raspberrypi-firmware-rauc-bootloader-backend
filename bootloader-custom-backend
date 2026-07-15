@@ -135,7 +135,7 @@ source_file() {
 get_slot() {
 	local i
 
-	source_file "${SYSTEM_CONF:-/etc/rauc/system.conf}"
+	source_file "${RAUC_SYSTEM_CONF:-/etc/rauc/system.conf}"
 	for i in "${INI[@]}"
 	do
 		local partition
@@ -161,7 +161,7 @@ get_slot() {
 		return
 	done
 
-	error "${SYSTEM_CONF:-/etc/rauc/system.conf}: $1: No such bootname"
+	error "${RAUC_SYSTEM_CONF:-/etc/rauc/system.conf}: $1: No such bootname"
 	unset INI "${!INI@}"
 	return 1
 }
@@ -350,7 +350,7 @@ get_primary() {
 	source_file "${AUTOBOOT_TXT:-/boot/autoboot.txt}"
 	boot_partition="$INI__ALL__BOOT_PARTITION"
 
-	source_file "${SYSTEM_CONF:-/etc/rauc/system.conf}"
+	source_file "${RAUC_SYSTEM_CONF:-/etc/rauc/system.conf}"
 	for i in "${INI[@]}"
 	do
 		local partition
@@ -375,7 +375,7 @@ get_primary() {
 		return
 	done
 
-	error "${SYSTEM_CONF:-/etc/rauc/system.conf}: $boot_partition: No such bootname"
+	error "${RAUC_SYSTEM_CONF:-/etc/rauc/system.conf}: $boot_partition: No such bootname"
 	return 1
 }
 

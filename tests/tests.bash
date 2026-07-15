@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# Copyright 2025 Gaël PORTAY
+# Copyright 2025-2026 Gaël PORTAY
 #
 # SPDX-License-Identifier: LGPL-2.1-or-later
 #
@@ -85,8 +85,8 @@ result() {
 AUTOBOOT_TXT="/tmp/autoboot.txt"
 export AUTOBOOT_TXT
 
-SYSTEM_CONF="system.conf"
-export SYSTEM_CONF
+RAUC_SYSTEM_CONF="system.conf"
+export RAUC_SYSTEM_CONF
 
 PATH="$PWD:$PATH"
 trap result 0 SIGINT
