@@ -1,7 +1,7 @@
 #!/bin/bash
 #
-# Copyright 2023-2025 Gaël PORTAY
-#           2023-2025 Rtone
+# Copyright 2023-2026 Gaël PORTAY
+#           2023-2026 Rtone
 #
 # SPDX-License-Identifier: LGPL-2.1-only
 #
@@ -67,7 +67,6 @@ error() {
 #
 #	$ echo "$INI__TRYBOOT__BOOT_PARTITION"
 #	3
-#
 source_file() {
 	local lines
 	local line
@@ -133,7 +132,6 @@ source_file() {
 #
 #	$ get_slot 3
 #	3
-#
 get_slot() {
 	local i
 
@@ -189,7 +187,6 @@ get_slot() {
 #
 # 	$ vcmailbox 0x00030064 4 0 0
 # 	0x0000001c 0x80000000 0x00030064 0x00000004 0x80000004 0x00000001 0x00000000
-#
 set_primary_temporary() {
 	vcmailbox 0x00038064 4 0 1
 }
@@ -217,7 +214,6 @@ set_primary_temporary() {
 # 	boot_partition=3
 # 	[tryboot]
 # 	boot_partition=2
-#
 set_primary_persistent() {
 	local tryboot_boot_partition
 	local all_boot_partition
@@ -259,7 +255,6 @@ set_primary_persistent() {
 # and its modules are part of the root filesystem. As a consequence, a kernel
 # update implies to update the kernel image in the boot partition to keep it
 # synced with its modules in the root partition.
-#
 get_state() {
 	local partition
 	local tryboot
