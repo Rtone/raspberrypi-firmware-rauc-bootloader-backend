@@ -206,7 +206,7 @@ else
 fi
 echo
 
-run "get-state reports the primary slot as good if the primary slot is booted and the tryboot flag is set"
+run "get-state reports the primary slot as good if the primary slot is booted even if the tryboot flag is set"
 if FDTGET_CHOSEN_BOOTLOADER_PARTITION=2 \
    FDTGET_CHOSEN_BOOTLOADER_TRYBOOT=1 \
    bootloader-custom-backend get-state 2 | tee /dev/stderr | grep -q '^good$'
@@ -227,10 +227,10 @@ else
 fi
 echo
 
-run "get-state reports the primary slot as good if the other slot is booted and if the tryboot flag is set"
+run "get-state reports the primary slot as bad if the other slot is booted"
 if FDTGET_CHOSEN_BOOTLOADER_PARTITION=3 \
    FDTGET_CHOSEN_BOOTLOADER_TRYBOOT=1 \
-   bootloader-custom-backend get-state 2 | tee /dev/stderr | grep -q '^good$'
+   bootloader-custom-backend get-state 2 | tee /dev/stderr | grep -q '^bad$'
 then
 	ok
 else

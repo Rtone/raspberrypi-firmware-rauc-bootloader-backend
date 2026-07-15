@@ -234,13 +234,9 @@ set_primary_persistent() {
 #
 # https://rauc.readthedocs.io/en/latest/integration.html#custom-bootloader-backend-interface
 
-# Output "good":
-#  - if the given slot is the primary slot, or
-#  - if the given slot is **NOT** the primary slot **AND** the reboot flag is
-#    set.
+# Output "good" if the given slot is the booted slot.
 #
-# Output "bad" otherwise (i.e. if the given slot is **NOT** the primary slot
-# **AND** the reboot flag is unset).
+# Output "bad" otherwise (i.e. if the given slot is **NOT** the booted slot).
 #
 # Note: The other slot (i.e. the non-boot'ed slot) is marked as "bad" since its
 # status is unknown and no persistent marker is used. However, it is considered
@@ -264,25 +260,14 @@ get_state() {
 		return 1
 	fi
 
+	# the slot is the booted slot, status is good
 	if [[ "$1" == "$current" ]]
 	then
 		echo good
 		return
 	fi
 
-	if ! tryboot="$(fdtget /sys/firmware/fdt /chosen/bootloader tryboot)"
-	then
-		error "tryboot: Cannot get bootloader tryboot"
-		return 1
-	fi
-
-	if [[ "$tryboot" -eq 1 ]]
-	then
-		echo good
-		return
-	fi
-
-	# status is unknwon
+	# the slot is not the booted slot, status is bad
 	echo bad
 }
 
