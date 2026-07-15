@@ -256,23 +256,15 @@ set_primary_persistent() {
 # update implies to update the kernel image in the boot partition to keep it
 # synced with its modules in the root partition.
 get_state() {
-	local partition
-	local tryboot
-	local slot
+	local current
 
-	if ! partition="$(fdtget /sys/firmware/fdt /chosen/bootloader partition)"
+	if ! current="$(get_current)"
 	then
-		error "partition: Cannot get bootloader partition"
+		error "partition: Cannot get current partition"
 		return 1
 	fi
 
-	if ! slot="$(get_slot "$partition")"
-	then
-		error "$partition: Cannot get slot"
-		return 1
-	fi
-
-	if [[ "$1" == "$slot" ]]
+	if [[ "$1" == "$current" ]]
 	then
 		echo good
 		return
