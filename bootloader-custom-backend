@@ -115,7 +115,7 @@ source_file() {
 #
 # Examples:
 #
-#	$ cat /etc/rauc/system.conf
+#	$ cat /usr/lib/rauc/system.conf
 #	(...)
 # 	[slot.firmware.0]
 # 	device=/dev/mmcblk0p2
@@ -138,7 +138,7 @@ source_file() {
 #	(...)
 #
 #	$ get_slot 1
-#	/etc/rauc/system.conf: 1: No such bootname
+#	/usr/lib/rauc/system.conf: 1: No such bootname
 #
 #	$ get_slot 2
 #	2
@@ -148,7 +148,7 @@ source_file() {
 get_slot() {
 	local i
 
-	source_file "${RAUC_SYSTEM_CONF:-/etc/rauc/system.conf}"
+	source_file "${RAUC_SYSTEM_CONF:-/usr/lib/rauc/system.conf}"
 	for i in "${INI[@]}"
 	do
 		local partition
@@ -174,7 +174,7 @@ get_slot() {
 		return
 	done
 
-	warning "${RAUC_SYSTEM_CONF:-/etc/rauc/system.conf}: $1: No such bootname"
+	warning "${RAUC_SYSTEM_CONF:-/usr/lib/rauc/system.conf}: $1: No such bootname"
 	unset INI "${!INI@}"
 	return 1
 }
@@ -416,7 +416,7 @@ get_primary() {
 		boot_partition="$INI__TRYBOOT__BOOT_PARTITION"
 	fi
 
-	source_file "${RAUC_SYSTEM_CONF:-/etc/rauc/system.conf}"
+	source_file "${RAUC_SYSTEM_CONF:-/usr/lib/rauc/system.conf}"
 	for i in "${INI[@]}"
 	do
 		local partition
@@ -441,7 +441,7 @@ get_primary() {
 		return
 	done
 
-	warning "${RAUC_SYSTEM_CONF:-/etc/rauc/system.conf}: $boot_partition: No such bootname"
+	warning "${RAUC_SYSTEM_CONF:-/usr/lib/rauc/system.conf}: $boot_partition: No such bootname"
 	return 1
 }
 
@@ -507,7 +507,7 @@ get_current() {
 	echo "$slot"
 }
 
-source_file "${RAUC_SYSTEM_CONF:-/etc/rauc/system.conf}"
+source_file "${RAUC_SYSTEM_CONF:-/usr/lib/rauc/system.conf}"
 RASPBERRYPI_AUTOBOOT_TXT="${INI__SYSTEM__RASPBERRYPI_AUTOBOOT_TXT:-/boot/autoboot.txt}"
 
 if [ "$1" = "get-state" ]

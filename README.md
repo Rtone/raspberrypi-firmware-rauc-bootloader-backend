@@ -186,7 +186,7 @@ The native bootchooser implementation in the RAUC tree is [ongoing][PR].
 The three files [system.conf-pi4], [autoboot.txt-a] and [hook.bash] in the
 directory `support` provide an example of a RAUC Raspberry Pi 4 Model B.
 
-	install -D -m0644 support/system.conf-pi4 /etc/rauc/system.conf
+	install -D -m0644 support/system.conf-pi4 /usr/lib/rauc/system.conf
 	install -D -m0644 support/autoboot.txt-a /boot/autoboot.txt
 
 _Note_: Set the following lines to the RAUC manifest file to enable for kernel

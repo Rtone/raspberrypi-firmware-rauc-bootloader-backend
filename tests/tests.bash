@@ -271,7 +271,7 @@ echo
 # the state cannot be determined or another error occurs, the custom bootloader
 # handler must exit with non-zero return value.
 
-run "get-state fails if slot is not defined in /etc/rauc/system.conf"
+run "get-state fails if slot is not defined in /usr/lib/rauc/system.conf"
 if ! bootloader-custom-backend get-state 0
 then
 	ok
@@ -335,7 +335,7 @@ echo
 # The return value must be 0 if the boot state was set successfully, or
 # non-zero if an error occurred.
 
-run "set-state fails if slot is not defined in /etc/rauc/system.conf"
+run "set-state fails if slot is not defined in /usr/lib/rauc/system.conf"
 if ! bootloader-custom-backend set-state 0 good && \
    ! bootloader-custom-backend set-state 0 bad 
 then
