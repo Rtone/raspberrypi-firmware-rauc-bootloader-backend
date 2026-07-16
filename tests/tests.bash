@@ -82,6 +82,9 @@ result() {
 	exit "$exitcode"
 }
 
+DEBUG=1
+export DEBUG
+
 RAUC_SYSTEM_CONF="system.conf"
 export RAUC_SYSTEM_CONF
 

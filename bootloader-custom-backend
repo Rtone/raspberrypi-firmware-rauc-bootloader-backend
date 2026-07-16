@@ -25,6 +25,15 @@ error() {
 	echo "Error: $*" >&2
 }
 
+debug() {
+	if [[ "${DEBUG:-0}" -eq 0 ]]
+	then
+		return
+	fi
+
+	echo "Debug: $*" >&2
+}
+
 # Trivial .ini-like syntax parser.
 #
 #	[section]
@@ -291,6 +300,7 @@ get_state() {
 	# the slot is the booted slot, status is good
 	if [[ "$1" == "$current" ]]
 	then
+		debug "Detected booted slot"
 		echo good
 		return
 	fi
@@ -324,6 +334,7 @@ set_state() {
 	# the slot is bad, do nothing
 	if [[ "$2" == bad ]]
 	then
+		debug "Ignore bad bootstate"
 		return
 	fi
 
@@ -336,8 +347,11 @@ set_state() {
 	# the tryboot is unset, do nothing
 	if [[ "$tryboot" -eq 0 ]]
 	then
+		debug "Ignore regular boot"
 		return
 	fi
+
+	debug "Detected tryboot boot"
 
 	if ! reboot="$(get_reboot_flag)"
 	then
@@ -348,17 +362,20 @@ set_state() {
 	# the oneshot reboot flag is already set, do nothing
 	if [[ "$reboot" -eq 1 ]]
 	then
+		debug "Ignore oneshot reboot flag"
 		return
 	fi
 
 	# the slot is the primary slot, do nothing
 	if [[ "$slot" == "$primary" ]]
 	then
+		debug "Ignore primary slot"
 		return
 	fi
 
 	# the slot is not yet the primary slot, update autoboot.txt
 	set_primary_persistent
+	debug "File updated"
 }
 
 # Output the bootname's slot of the boot_partition set in the section [all] in
@@ -391,6 +408,7 @@ get_primary() {
 	# the oneshot reboot flag is set, use [tryboot] section
 	if [[ "$reboot" -eq 1 ]]
 	then
+		debug "Detected oneshot reboot flag"
 		boot_partition="$INI__TRYBOOT__BOOT_PARTITION"
 	fi
 
@@ -439,6 +457,7 @@ set_primary() {
 	# the slot is already the primary slot, do nothing
 	if [[ "$1" == "$primary" ]]
 	then
+		debug "Detected primary slot"
 		return
 	fi
 
@@ -453,12 +472,14 @@ set_primary() {
 	if [[ "$reboot" -eq 1 ]]
 	then
 		set_reboot_flag 0
+		debug "Oneshot reboot flag cleared"
 		return
 	fi
 
 	# The slot is not yet the primary slot in autoboot.txt (the oneshot
 	# reboot flag is unset), set the oneshot reboot flag
 	set_reboot_flag 1
+	debug "Oneshot reboot flag set"
 }
 
 # Output the bootname's slot of the partition number set by the bootloader in
