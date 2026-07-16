@@ -213,9 +213,9 @@ echo
 # system.conf. If the set was successful, the handler must also return with a
 # 0, otherwise the return value must be non-zero.
 
-run "set-primary keeps the autoboot.txt unchanged if the primary slot is marked as primary even if an undefined slot is booted"
+run "set-primary keeps the reboot flag unchanged if the primary slot is marked as primary"
 if bootloader-custom-backend set-primary 2 && \
-   diff /tmp/autoboot.txt autoboot.txt-a
+   ! test -e /tmp/00038064
 then
 	ok
 else
@@ -223,15 +223,40 @@ else
 fi
 echo
 
-run "set-primary keeps the autoboot.txt unchanged if the primary slot is marked as primary if the primary slot is booted"
-if FDTGET_CHOSEN_BOOTLOADER_PARTITION=2 \
-   bootloader-custom-backend set-primary 2 && \
-   diff /tmp/autoboot.txt autoboot.txt-a
+run "set-primary keeps the reboot flag if the other slot is marked as primary and if the reboot flag is set"
+if VCMAILBOX_00030064=1 \
+   bootloader-custom-backend set-primary 3 && \
+   ! test -e /tmp/00038064
 then
 	ok
 else
 	ko
 fi
+echo
+
+run "set-primary clears the reboot flag if the primary slot is marked as primary and if the reboot flag is set"
+if VCMAILBOX_00030064=1 \
+   bootloader-custom-backend set-primary 2 && \
+   grep "^0x0000001c 0x80000000 0x00038064 0x00000004 0x80000004 0x00000000 0x00000000$" /tmp/00038064
+then
+	ok
+else
+	ko
+fi
+# restore setup
+rm /tmp/00038064
+echo
+
+run "set-primary sets the reboot flag if the primary slot is marked as primary and if the reboot flag is set"
+if bootloader-custom-backend set-primary 3 && \
+   grep "^0x0000001c 0x80000000 0x00038064 0x00000004 0x80000004 0x00000001 0x00000000$" /tmp/00038064
+then
+	ok
+else
+	ko
+fi
+# restore setup
+rm /tmp/00038064
 echo
 
 # get-state

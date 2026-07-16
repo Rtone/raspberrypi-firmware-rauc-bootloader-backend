@@ -194,8 +194,8 @@ get_reboot_flag() {
 	echo "$((values[5]))"
 }
 
-# Set the oneshot reboot flag to cause the firmware to run tryboot at next
-# reboot.
+# Set or clear the oneshot reboot flag to cause the firmware to run tryboot or
+# not at next reboot.
 #
 # The firmware uses the boot_partition defined in the [tryboot] section and it
 # loads the alternate configuration file tryboot.txt instead of config.txt at
@@ -210,13 +210,13 @@ get_reboot_flag() {
 #
 # Example:
 #
-#	$ set_primary_temporary
+#	$ set_reboot_flag 1
 # 	0x0000001c 0x80000000 0x00038064 0x00000004 0x80000004 0x00000000 0x00000000
 #
 # 	$ vcmailbox 0x00030064 4 0 0
 # 	0x0000001c 0x80000000 0x00030064 0x00000004 0x80000004 0x00000001 0x00000000
-set_primary_temporary() {
-	vcmailbox 0x00038064 4 0 1
+set_reboot_flag() {
+	vcmailbox 0x00038064 4 0 "$1"
 }
 
 # Swap the boot_partition configurations in autoboot.txt to cause the firmware
@@ -423,11 +423,12 @@ get_primary() {
 	return 1
 }
 
-# Set the primary slot either persistently in the static file autoboot.txt if
-# it is the boot'ed slot or temporarily via the tryboot reboot flag otherwise.
+# Set the other slot as primary temporarily toggling the oneshot reboot flag.
+#
+# Do nothing otherwise.
 set_primary() {
-	local tryboot
 	local primary
+	local reboot
 
 	if ! primary="$(get_primary)"
 	then
@@ -435,25 +436,29 @@ set_primary() {
 		return 1
 	fi
 
-	if [[ "$1" != "$primary" ]]
+	# the slot is already the primary slot, do nothing
+	if [[ "$1" == "$primary" ]]
 	then
-		set_primary_temporary
 		return
 	fi
 
-	# Set the other slot as primary slot.
-	if ! tryboot="$(fdtget /sys/firmware/fdt /chosen/bootloader tryboot)"
+	if ! reboot="$(get_reboot_flag)"
 	then
-		error "tryboot: Cannot get bootloader tryboot"
+		error "reboot: Cannot get oneshot reboot flag"
 		return 1
 	fi
 
-	if [[ "$tryboot" -eq 1 ]]
+	# the slot is already already the primary slot in autoboot.txt (the
+	# onehost reboot flag is set), clear the oneshot reboot flag
+	if [[ "$reboot" -eq 1 ]]
 	then
-		# Commit [tryboot] boot_partition to [all]
-		set_primary_persistent
+		set_reboot_flag 0
 		return
 	fi
+
+	# The slot is not yet the primary slot in autoboot.txt (the oneshot
+	# reboot flag is unset), set the oneshot reboot flag
+	set_reboot_flag 1
 }
 
 # Output the bootname's slot of the partition number set by the bootloader in
