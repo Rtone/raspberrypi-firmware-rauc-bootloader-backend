@@ -149,6 +149,62 @@ else
 fi
 echo
 
+run "get-primary reports the boot_partition from section [tryboot] in autoboot.txt if undefined slot is booted and if reboot flag is set"
+if VCMAILBOX_00030064=1 \
+   bootloader-custom-backend get-primary | tee /dev/stderr | grep -q '^3$'
+then
+	ok
+else
+	ko
+fi
+echo
+
+run "get-primary reports the boot_partition from section [tryboot] in autoboot.txt if primary slot is booted and if reboot flag is set"
+if VCMAILBOX_00030064=1 \
+   FDTGET_CHOSEN_BOOTLOADER_PARTITION=2 \
+   bootloader-custom-backend get-primary | tee /dev/stderr | grep -q '^3$'
+then
+	ok
+else
+	ko
+fi
+echo
+
+run "get-primary reports the boot_partition from section [tryboot] in autoboot.txt if primary slot is booted and the tryboot and reboot flags are set"
+if VCMAILBOX_00030064=1 \
+   FDTGET_CHOSEN_BOOTLOADER_PARTITION=2 \
+   FDTGET_CHOSEN_BOOTLOADER_TRYBOOT=1 \
+   bootloader-custom-backend get-primary | tee /dev/stderr | grep -q '^3$'
+then
+	ok
+else
+	ko
+fi
+echo
+
+run "get-primary reports the boot_partition from section [tryboot] in autoboot.txt if other slot is booted and if reboot flag is set"
+if VCMAILBOX_00030064=1 \
+   FDTGET_CHOSEN_BOOTLOADER_PARTITION=3 \
+   bootloader-custom-backend get-primary | tee /dev/stderr | grep -q '^3$'
+then
+	ok
+else
+	ko
+fi
+echo
+
+run "get-primary reports the boot_partition from section [tryboot] in autoboot.txt if other slot is booted and the tryboot and reboot flags are set"
+if VCMAILBOX_00030064=1 \
+   FDTGET_CHOSEN_BOOTLOADER_PARTITION=3 \
+   FDTGET_CHOSEN_BOOTLOADER_TRYBOOT=1 \
+   bootloader-custom-backend get-primary | tee /dev/stderr | grep -q '^3$'
+then
+	ok
+else
+	ko
+fi
+echo
+
 # set-primary
 #
 # Accordingly, in order to set the primary slot, the custom bootloader handler

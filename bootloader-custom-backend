@@ -361,8 +361,10 @@ set_state() {
 	set_primary_persistent
 }
 
-# Output the bootname's slot of the boot_partition set in the section [all] of
-# the file autoboot.txt if a slot defines bootname in system.conf.
+# Output the bootname's slot of the boot_partition set in the section [all] in
+# the file autoboot.txt if the oneshot reboot flag is unset, or the slot with
+# boot_partition set in the section [tryboot] in the file autoboot.txt if the
+# oneshot reboot flag is set.
 #
 # Note: The boot_partition device **MUST** be defined in system.conf; the slot
 # for the boot partition is bootname'd, and the slot for the root is parent'ed
@@ -374,10 +376,23 @@ set_state() {
 # it says no word about the boot'ed device (i.e. it says ~~/dev/mmcblk0p~~1).
 get_primary() {
 	local boot_partition
+	local reboot
 	local i
 
 	source_file "${RASPBERRYPI_AUTOBOOT_TXT:-/boot/autoboot.txt}"
 	boot_partition="$INI__ALL__BOOT_PARTITION"
+
+	if ! reboot="$(get_reboot_flag)"
+	then
+		error "reboot: Cannot get oneshot reboot flag"
+		return 1
+	fi
+
+	# the oneshot reboot flag is set, use [tryboot] section
+	if [[ "$reboot" -eq 1 ]]
+	then
+		boot_partition="$INI__TRYBOOT__BOOT_PARTITION"
+	fi
 
 	source_file "${RAUC_SYSTEM_CONF:-/etc/rauc/system.conf}"
 	for i in "${INI[@]}"
