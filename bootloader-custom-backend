@@ -21,6 +21,10 @@
 
 set -e
 
+warning() {
+	echo "Warning: $*" >&2
+}
+
 error() {
 	echo "Error: $*" >&2
 }
@@ -170,7 +174,7 @@ get_slot() {
 		return
 	done
 
-	error "${RAUC_SYSTEM_CONF:-/etc/rauc/system.conf}: $1: No such bootname"
+	warning "${RAUC_SYSTEM_CONF:-/etc/rauc/system.conf}: $1: No such bootname"
 	unset INI "${!INI@}"
 	return 1
 }
@@ -437,7 +441,7 @@ get_primary() {
 		return
 	done
 
-	error "${RAUC_SYSTEM_CONF:-/etc/rauc/system.conf}: $boot_partition: No such bootname"
+	warning "${RAUC_SYSTEM_CONF:-/etc/rauc/system.conf}: $boot_partition: No such bootname"
 	return 1
 }
 
