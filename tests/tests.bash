@@ -85,6 +85,9 @@ result() {
 DEBUG=1
 export DEBUG
 
+RASPBERRYPI_AUTOBOOT_TXT="/tmp/autoboot.txt"
+export RASPBERRYPI_AUTOBOOT_TXT
+
 RAUC_SYSTEM_CONF="system.conf"
 export RAUC_SYSTEM_CONF
 
@@ -92,7 +95,7 @@ PATH="$PWD:$PATH"
 trap result 0 SIGINT
 
 rm -f /tmp/00038064
-cp autoboot.txt-a /tmp/autoboot.txt
+cp autoboot.txt-a "$RASPBERRYPI_AUTOBOOT_TXT"
 
 # get-primary
 #
@@ -259,7 +262,7 @@ echo
 
 run "set-state ignores if the slot is marked as bad"
 if bootloader-custom-backend set-state 2 bad && \
-   diff /tmp/autoboot.txt autoboot.txt-a
+   diff "$RASPBERRYPI_AUTOBOOT_TXT" autoboot.txt-a
 then
 	ok
 else
@@ -269,7 +272,7 @@ echo
 
 run "set-state ignores if the slot is marked as bad, even if the slot is the other slot"
 if bootloader-custom-backend set-state 3 bad && \
-   diff /tmp/autoboot.txt autoboot.txt-a
+   diff "$RASPBERRYPI_AUTOBOOT_TXT" autoboot.txt-a
 then
 	ok
 else
@@ -280,7 +283,7 @@ echo
 run "set-state keeps the autoboot.txt unchanged if the slot is marked as good and if the tryboot flag is unset"
 if FDTGET_CHOSEN_BOOTLOADER_TRYBOOT=0 \
    bootloader-custom-backend set-state 2 good && \
-   diff /tmp/autoboot.txt autoboot.txt-a
+   diff "$RASPBERRYPI_AUTOBOOT_TXT" autoboot.txt-a
 then
 	ok
 else
@@ -291,7 +294,7 @@ echo
 run "set-state keeps the autoboot.txt unchanged if the slot is marked as good and if the tryboot flag is unset, even if the slot is the other slot"
 if FDTGET_CHOSEN_BOOTLOADER_TRYBOOT=0 \
    bootloader-custom-backend set-state 3 good && \
-   diff /tmp/autoboot.txt autoboot.txt-a
+   diff "$RASPBERRYPI_AUTOBOOT_TXT" autoboot.txt-a
 then
 	ok
 else
@@ -303,7 +306,7 @@ run "set-state keeps the autoboot.txt unchanged if the slot is marked as good an
 if FDTGET_CHOSEN_BOOTLOADER_TRYBOOT=1 \
    VCMAILBOX_00030064=1 \
    bootloader-custom-backend set-state 3 good && \
-   diff /tmp/autoboot.txt autoboot.txt-a
+   diff "$RASPBERRYPI_AUTOBOOT_TXT" autoboot.txt-a
 then
 	ok
 else
@@ -315,14 +318,14 @@ run "set-state swaps the boot_partition in autoboot.txt if the other slot is mar
 if FDTGET_CHOSEN_BOOTLOADER_TRYBOOT=1 \
    VCMAILBOX_00030064=0 \
    bootloader-custom-backend set-state 3 good && \
-   diff /tmp/autoboot.txt autoboot.txt-b
+   diff "$RASPBERRYPI_AUTOBOOT_TXT" autoboot.txt-b
 then
 	ok
 else
 	ko
 fi
 # restore setup
-cp autoboot.txt-a /tmp/autoboot.txt
+cp autoboot.txt-a "$RASPBERRYPI_AUTOBOOT_TXT"
 echo
 
 # get-current

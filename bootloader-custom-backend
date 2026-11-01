@@ -508,7 +508,7 @@ get_current() {
 }
 
 source_file "${RAUC_SYSTEM_CONF:-/usr/lib/rauc/system.conf}"
-RASPBERRYPI_AUTOBOOT_TXT="${INI__SYSTEM__RASPBERRYPI_AUTOBOOT_TXT:-/boot/autoboot.txt}"
+RASPBERRYPI_AUTOBOOT_TXT="${RASPBERRYPI_AUTOBOOT_TXT:-$INI__SYSTEM__RASPBERRYPI_AUTOBOOT_TXT}"
 
 if [ "$1" = "get-state" ]
 then
